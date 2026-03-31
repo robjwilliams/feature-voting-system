@@ -69,6 +69,8 @@ export default function HomePage() {
   }
 
   function handleVote(featureId: number) {
+    const previous = features;
+
     setFeatures((prev) => {
       if (!prev) return prev;
 
@@ -85,7 +87,7 @@ export default function HomePage() {
     });
 
     api.votes.toggle(featureId).catch(() => {
-      console.error("Vote request failed");
+      setFeatures(previous);
     });
   }
 
