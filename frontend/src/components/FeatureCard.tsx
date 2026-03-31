@@ -25,9 +25,13 @@ export function FeatureCard({ feature, onVote }: FeatureCardProps) {
 
         <p className="text-xs text-muted-foreground mt-1">
           by{" "}
-          <span className="font-medium text-foreground/70">
-            {feature.author_username}
-          </span>
+          {feature.is_author ? (
+            <span className="font-medium text-green-600">YOU</span>
+          ) : (
+            <span className="font-medium text-foreground/70">
+              {feature.author_username}
+            </span>
+          )}
         </p>
 
         {feature.description && (
