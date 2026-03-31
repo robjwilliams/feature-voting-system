@@ -1,21 +1,21 @@
 # Feature Voting System
 
-A full-stack app for teams to submit and upvote product feature requests. Users log in, propose features, and vote on what should get built next — the list ranks itself by vote count in real time.
+A full-stack app for teams to submit and upvote product feature requests. Users log in, propose features, and vote on what should get built next — the list ranks itself by vote count.
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────┐
 │  Browser                        │
-│  Next.js 14 (App Router)        │
-│  React 19 · TypeScript          │
-│  Tailwind CSS 4 · shadcn/ui     │
+│  Next.js (App Router)           │
+│  React · TypeScript             │
+│  Tailwind CSS · shadcn/ui       │
 └──────────────┬──────────────────┘
                │ HTTP REST + JWT Bearer token
 ┌──────────────▼──────────────────┐
 │  Backend                        │
 │  Django 5 + REST Framework      │
-│  SimpleJWT · Custom permissions │
+│  SimpleJWT                      │
 └──────────────┬──────────────────┘
                │ SQL (psycopg2)
 ┌──────────────▼──────────────────┐
@@ -30,48 +30,30 @@ All services run via Docker Compose.
 
 ### Frontend (`frontend/`)
 
-Built with **Next.js 14 App Router**, TypeScript, Tailwind CSS 4, and shadcn/ui components.
-
 | Path            | Description                                                                                   |
 | --------------- | --------------------------------------------------------------------------------------------- |
 | `/login`        | Single-click sign-in using default credentials (`admin` / `admin`, configurable via env vars) |
 | `/`             | Feature list, sorted by vote count                                                            |
 | `/features/new` | Create a new feature request                                                                  |
 
-Key internals:
-
-- **`AuthContext`** — global JWT state (user object, `login()`, `logout()`); token persisted to `localStorage` under the key `fv-token`
-- **`lib/api.ts`** — typed fetch wrapper that automatically attaches the `Authorization: Bearer <token>` header to every request
-- **Optimistic updates** — vote counts update immediately in local state before the API response returns, keeping the UI snappy
+- **`AuthContext`** — global JWT state; token persisted to `localStorage` under `fv-token`
+- **`lib/api.ts`** — typed fetch wrapper that automatically attaches the `Authorization: Bearer` header
+- **Optimistic updates** — vote counts update in local state before the API response returns, then re-sort the list
 
 ### Backend (`backend/`)
-
-Built with **Django 5** and **Django REST Framework**. Authentication is handled by **SimpleJWT** (Bearer tokens).
 
 Three Django apps:
 
 | App        | Responsibility                                                                     |
 | ---------- | ---------------------------------------------------------------------------------- |
 | `users`    | Custom `User` model (extends `AbstractUser`); `/api/auth/me/` profile endpoint     |
-| `features` | Feature CRUD; `IsAuthorOrReadOnly` permission — only the author can edit/delete    |
+| `features` | Feature list and create                                                            |
 | `votes`    | Vote toggle (create or delete); prevents authors from voting on their own features |
 
 Notable patterns:
 
-- **Denormalized `vote_count`** — `Feature.vote_count` is a plain integer column kept in sync by Django `post_save` / `post_delete` signals on the `Vote` model, avoiding expensive `COUNT()` queries on every list request
-- **Query optimization** — the feature list view uses `select_related('author')` and `prefetch_related('votes')` to avoid N+1 queries
-
-### Database (PostgreSQL 16)
-
-| Table              | Key columns                                                     |
-| ------------------ | --------------------------------------------------------------- |
-| `users_user`       | Standard Django auth fields                                     |
-| `features_feature` | `title`, `description`, `author_id`, `vote_count`, `created_at` |
-| `votes_vote`       | `feature_id`, `user_id`, `created_at`                           |
-
-- Unique constraint on `(feature_id, user_id)` prevents duplicate votes
-- Index on `vote_count` for efficient ranking queries
-- Features are ordered by `vote_count DESC`, then `created_at DESC`
+- **Denormalized `vote_count`** — plain integer column kept in sync via Django `post_save` / `post_delete` signals on `Vote`, avoiding `COUNT()` on every list request
+- **Query optimization** — `select_related('author')` plus a SQL `EXISTS` annotation for `has_voted`, keeping the list fetch to a single query
 
 ## API Reference
 
@@ -96,7 +78,7 @@ All endpoints require `Authorization: Bearer <token>`.
 
 ```bash
 # 1. Clone the repo
-git clone <repo-url>
+git clone git@github.com:robjwilliams/feature-voting-system.git
 cd feature-voting-system
 
 # 2. Copy environment file (defaults work out of the box)
@@ -124,29 +106,6 @@ docker compose exec backend python manage.py seed_demo
 | PostgreSQL   | localhost:5432              |
 
 Sign in at http://localhost:3000/login with the default credentials (`admin` / `admin`).
-
-### Local Development (without Docker)
-
-**Backend:**
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env       # edit POSTGRES_* vars to match your local DB
-python manage.py migrate
-python manage.py runserver
-```
-
-**Frontend:**
-
-```bash
-cd frontend
-npm install
-# set NEXT_PUBLIC_API_URL=http://localhost:8000 in frontend/.env.local
-npm run dev
-```
 
 ## Running Tests
 
