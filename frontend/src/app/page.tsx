@@ -111,10 +111,26 @@ export default function HomePage() {
         {features.map((feature, index) => (
           <div
             key={feature.id}
-            className="animate-in-feature"
+            className="flex items-start gap-2 animate-in-feature"
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            <FeatureCard feature={feature} onVote={handleVote} />
+            <span
+              className={[
+                "text-lg font-bold tabular-nums shrink-0 w-10 text-right pt-3.5",
+                index === 0
+                  ? "text-amber-400"
+                  : index === 1
+                  ? "text-slate-400"
+                  : index === 2
+                  ? "text-orange-400"
+                  : "text-muted-foreground/40",
+              ].join(" ")}
+            >
+              #{index + 1}
+            </span>
+            <div className="flex-1 min-w-0">
+              <FeatureCard feature={feature} onVote={handleVote} />
+            </div>
           </div>
         ))}
       </div>
