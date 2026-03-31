@@ -6,3 +6,5 @@
 2026-03-29T00:05:00Z | Switched to real JWT auth with djangorestframework-simplejwt: replaced DRF TokenAuthentication with JWTAuthentication, removed custom LoginView in favor of TokenObtainPairView, added seed_users management command, updated frontend to use Bearer header and password-based login, added logout to AuthContext and NavBar, removed UserSwitcher.
 
 [2026-03-30T00:00:00Z] Invoked /frontend-design skill. Redesigned home page and FeatureCard with a dark "Broadcast Board" aesthetic: deep navy-black background, amber/gold (#primary = oklch(0.82 0.18 82)) accent, Sora + Bebas Neue fonts, horizontal feature strips with faint rank watermarks, amber VoteButton counter, staggered fade-slide-up entrance animations.
+
+[2026-03-31T00:00:00Z] Removed unused IsAuthenticated import from features/views.py. Replaced prefetch_related('votes') + Python iteration for has_voted with a SQL Exists subquery annotation; switched to get_queryset() to inject request.user at query time; simplified serializer has_voted to BooleanField(read_only=True). 
