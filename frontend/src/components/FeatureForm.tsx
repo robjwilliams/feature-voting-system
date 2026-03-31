@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { api } from '@/lib/api';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { api } from "@/lib/api";
 
 export function FeatureForm() {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,10 +23,13 @@ export function FeatureForm() {
     setError(null);
 
     try {
-      await api.features.create({ title: title.trim(), description: description.trim() });
-      router.push('/');
+      await api.features.create({
+        title: title.trim(),
+        description: description.trim(),
+      });
+      router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -47,23 +50,25 @@ export function FeatureForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="description">Description <span className="text-muted-foreground">(optional)</span></Label>
+        <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
           placeholder="What problem does this solve? Any additional context..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
+          required
         />
       </div>
 
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={loading || !title.trim()}>
-          {loading ? 'Submitting...' : 'Submit Feature'}
+        <Button
+          type="submit"
+          disabled={loading || !title.trim() || !description.trim()}
+        >
+          {loading ? "Submitting..." : "Submit Feature"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancel
