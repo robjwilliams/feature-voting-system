@@ -1,3 +1,4 @@
+from django.db.models import Exists, OuterRef
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 from users.models import User
@@ -41,7 +42,10 @@ class FeatureSerializerComputedFieldsTest(TestCase):
     def _serialize(self, user):
         request = self.factory.get('/')
         request.user = user
-        return FeatureSerializer(self.feature, context={'request': request}).data
+        feature = Feature.objects.annotate(
+            has_voted=Exists(Vote.objects.filter(feature=OuterRef('pk'), user=user))
+        ).get(pk=self.feature.pk)
+        return FeatureSerializer(feature, context={'request': request}).data
 
     def test_has_voted_false_when_user_has_not_voted(self):
         data = self._serialize(self.other)
@@ -49,8 +53,6 @@ class FeatureSerializerComputedFieldsTest(TestCase):
 
     def test_has_voted_true_when_user_has_voted(self):
         Vote.objects.create(feature=self.feature, user=self.other)
-        # Refresh so prefetch cache is clean
-        self.feature = Feature.objects.prefetch_related('votes').get(pk=self.feature.pk)
         data = self._serialize(self.other)
         self.assertTrue(data['has_voted'])
 
