@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${jakarta.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground" suppressHydrationWarning>
         <AuthProvider>
           <NavBar />
           <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
