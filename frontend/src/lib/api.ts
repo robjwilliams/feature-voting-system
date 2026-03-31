@@ -35,7 +35,6 @@ export const api = {
   },
   features: {
     list: () => apiFetch<Feature[]>('/api/features/'),
-    get: (id: number) => apiFetch<Feature>(`/api/features/${id}/`),
     create: (data: CreateFeatureInput) =>
       apiFetch<Feature>('/api/features/', {
         method: 'POST',

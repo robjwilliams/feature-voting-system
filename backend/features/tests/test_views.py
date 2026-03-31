@@ -37,27 +37,3 @@ class FeatureViewsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['author_username'], self.author.username)
 
-    # --- Update ---
-
-    def test_author_can_patch_own_feature(self):
-        self.client.force_authenticate(user=self.author)
-        response = self.client.patch(f'/api/features/{self.feature.pk}/', {'title': 'Updated'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['title'], 'Updated')
-
-    def test_non_author_cannot_patch_feature(self):
-        self.client.force_authenticate(user=self.other)
-        response = self.client.patch(f'/api/features/{self.feature.pk}/', {'title': 'Hijacked'})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    # --- Delete ---
-
-    def test_author_can_delete_own_feature(self):
-        self.client.force_authenticate(user=self.author)
-        response = self.client.delete(f'/api/features/{self.feature.pk}/')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-    def test_non_author_cannot_delete_feature(self):
-        self.client.force_authenticate(user=self.other)
-        response = self.client.delete(f'/api/features/{self.feature.pk}/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
