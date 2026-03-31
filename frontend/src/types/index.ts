@@ -9,7 +9,6 @@ export interface Feature {
   description: string;
   author_username: string;
   vote_count: number;
-  status: 'open' | 'in_progress' | 'done' | 'rejected';
   has_voted: boolean;
   is_author: boolean;
   created_at: string;
