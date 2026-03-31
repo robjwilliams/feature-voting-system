@@ -1,23 +1,34 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { VoteButton } from "./VoteButton";
 import { Feature } from "@/types";
 
-const STATUS_LABELS: Record<Feature["status"], string> = {
-  open: "Open",
-  in_progress: "In Progress",
-  done: "Done",
-  rejected: "Rejected",
-};
-
-const STATUS_VARIANTS: Record<
+const STATUS_CONFIG: Record<
   Feature["status"],
-  "default" | "secondary" | "outline" | "destructive"
+  { label: string; bg: string; text: string; dot: string }
 > = {
-  open: "default",
-  in_progress: "secondary",
-  done: "outline",
-  rejected: "destructive",
+  open: {
+    label: "Open",
+    bg: "bg-indigo-50",
+    text: "text-indigo-700",
+    dot: "bg-indigo-400",
+  },
+  in_progress: {
+    label: "In Progress",
+    bg: "bg-orange-50",
+    text: "text-orange-700",
+    dot: "bg-orange-400",
+  },
+  done: {
+    label: "Done",
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    dot: "bg-emerald-400",
+  },
+  rejected: {
+    label: "Rejected",
+    bg: "bg-red-50",
+    text: "text-red-600",
+    dot: "bg-red-400",
+  },
 };
 
 interface FeatureCardProps {
@@ -26,38 +37,43 @@ interface FeatureCardProps {
 }
 
 export function FeatureCard({ feature, onVote }: FeatureCardProps) {
+  const status = STATUS_CONFIG[feature.status];
+
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer">
-      <CardHeader className="pb-2">
-        <div className="flex items-start gap-3">
-          <VoteButton
-            voteCount={feature.vote_count}
-            hasVoted={feature.has_voted}
-            isAuthor={feature.is_author}
-            onClick={() => onVote(feature.id)}
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="font-semibold text-base leading-tight">
-                {feature.title}
-              </h2>
-              <Badge variant={STATUS_VARIANTS[feature.status]}>
-                {STATUS_LABELS[feature.status]}
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              by {feature.author_username}
-            </p>
-          </div>
+    <div className="flex items-start gap-4 bg-card rounded-2xl border border-border p-4 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200">
+      <VoteButton
+        voteCount={feature.vote_count}
+        hasVoted={feature.has_voted}
+        isAuthor={feature.is_author}
+        onClick={() => onVote(feature.id)}
+      />
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="font-semibold text-[15px] leading-snug text-foreground">
+            {feature.title}
+          </h2>
+          <span
+            className={`shrink-0 inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${status.bg} ${status.text}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+            {status.label}
+          </span>
         </div>
-      </CardHeader>
-      {feature.description && (
-        <CardContent className="pt-0 pl-[72px]">
-          <p className="text-sm text-muted-foreground line-clamp-2">
+
+        <p className="text-xs text-muted-foreground mt-1">
+          by{" "}
+          <span className="font-medium text-foreground/70">
+            {feature.author_username}
+          </span>
+        </p>
+
+        {feature.description && (
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed line-clamp-2">
             {feature.description}
           </p>
-        </CardContent>
-      )}
-    </Card>
+        )}
+      </div>
+    </div>
   );
 }
