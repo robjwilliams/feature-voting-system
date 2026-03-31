@@ -15,7 +15,6 @@ class FeatureSerializer(serializers.ModelSerializer):
             'description',
             'author_username',
             'vote_count',
-            'status',
             'has_voted',
             'is_author',
             'created_at',
